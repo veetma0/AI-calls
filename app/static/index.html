@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>AI Calls — ваши звонки</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <a href="/" class="brand">AI<span>Calls</span></a
+      ><span class="caption">Голосовой помощник вашей команды</span
+      ><span id="mode" class="tag">Voximplant + ElevenLabs</span>
+    </header>
+    <main>
+      <section id="login" class="login card">
+        <p class="eyebrow">ПАНЕЛЬ ЗВОНКОВ</p>
+        <h1>Один разговор.<br />Понятный результат.</h1>
+        <p>
+          Добавьте ваших людей, задайте цель разговора и запустите очередь.
+          Помощник позвонит сам.
+        </p>
+        <form id="login-form">
+          <label
+            >Токен доступа<input
+              id="token"
+              type="password"
+              autocomplete="off"
+              required
+              placeholder="ADMIN_TOKEN из вашего .env" /></label
+          ><button>Войти в панель</button>
+        </form>
+        <small
+          >Токен хранится только в памяти этой вкладки. После обновления
+          страницы войдите снова.</small
+        >
+      </section>
+      <div id="workspace" hidden>
+        <section class="intro">
+          <div>
+            <p class="eyebrow">ИСХОДЯЩИЕ ЗВОНКИ</p>
+            <h1 id="product-name">Ваш голосовой помощник</h1>
+            <p id="limits"></p>
+          </div>
+          <button class="secondary" id="logout">Выйти</button>
+        </section>
+        <div id="mode-notice" class="notice"></div>
+        <div id="config-notice" class="notice warning" hidden></div>
+        <section class="queue card">
+          <div>
+            <h2 id="queue-title">Очередь на паузе</h2>
+            <p id="queue-note">Добавьте звонки и запустите очередь.</p>
+          </div>
+          <div class="actions">
+            <button id="resume">Запустить очередь</button
+            ><button id="pause" class="danger">Остановить звонки</button>
+          </div>
+        </section>
+        <div class="grid">
+          <section class="card">
+            <h2>Добавить человека</h2>
+            <form id="contact-form">
+              <label
+                >Имя<input
+                  name="name"
+                  maxlength="120"
+                  placeholder="Как обращаться" /></label
+              ><label
+                >Российский номер<input
+                  name="phone"
+                  type="tel"
+                  required
+                  placeholder="+7 …" /></label
+              ><label
+                >Часовой пояс<input
+                  name="timezone"
+                  value="Europe/Moscow"
+                  required /></label
+              ><label
+                >Откуда согласие на звонок<input
+                  name="consent_source"
+                  minlength="3"
+                  maxlength="500"
+                  required
+                  placeholder="Например: заявка №123 от клиента" /></label
+              ><label
+                >Когда получено согласие<input
+                  name="consent_at"
+                  type="datetime-local"
+                  required /></label
+              ><label class="check"
+                ><input name="confirm" type="checkbox" required /> Этот человек
+                согласился на такой звонок</label
+              ><button>Сохранить контакт</button>
+            </form>
+          </section>
+          <section class="card">
+            <div class="section-head">
+              <h2>Ваши контакты</h2>
+              <label class="upload"
+                >Импорт CSV<input
+                  id="csv-file"
+                  type="file"
+                  accept=".csv,text/csv"
+                  hidden
+              /></label>
+            </div>
+            <p class="hint">
+              CSV: phone,name,consent_source,consent_at,timezone. До 500 строк.
+              Импорт сам по себе не запускает звонки.
+            </p>
+            <label
+              >Когда можно начать (необязательно)<input
+                id="schedule"
+                type="datetime-local"
+            /></label>
+            <div id="contacts" class="contacts"></div>
+          </section>
+        </div>
+        <section class="card">
+          <div class="section-head">
+            <h2>Звонки и результаты</h2>
+            <button id="refresh" class="secondary">Обновить</button>
+          </div>
+          <p class="hint">
+            «Неизвестно» требует сверки в Voximplant. Такой звонок не
+            повторяется автоматически.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Человек</th>
+                  <th>Статус</th>
+                  <th>Результат</th>
+                  <th>Длительность</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="calls"></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="card">
+          <h2>Не звонить</h2>
+          <p class="hint">
+            Отказ собеседника сохраняется автоматически. Можно добавить номер
+            вручную.
+          </p>
+          <form id="suppress-form" class="inline">
+            <input
+              name="phone"
+              type="tel"
+              required
+              aria-label="Номер для запрета звонков"
+              placeholder="+7 …"
+            /><input
+              name="reason"
+              required
+              placeholder="Причина"
+              aria-label="Причина запрета"
+            /><button class="secondary">Добавить запрет</button>
+          </form>
+          <div id="suppressions" class="suppressed"></div>
+        </section>
+      </div>
+      <div id="message" role="status" aria-live="polite" hidden></div>
+      <dialog id="detail">
+        <div class="section-head">
+          <h2>Разговор</h2>
+          <button id="close-detail" class="secondary">Закрыть</button>
+        </div>
+        <div id="detail-content"></div>
+      </dialog>
+    </main>
+    <footer>
+      Voximplant доставляет звонок · ElevenLabs ведёт диалог · CRM не требуется
+    </footer>
+  </body>
+</html>

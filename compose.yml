@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_PATH: /data/calls.sqlite3
+      PRODUCT_CONFIG_PATH: /app/config/product.json
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - calls_data:/data
+      - ./config/product.json:/app/config/product.json:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 30s
+
+volumes:
+  calls_data:

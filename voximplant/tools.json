@@ -1,0 +1,37 @@
+[
+  {
+    "type": "client",
+    "name": "opt_out",
+    "description": "Сохранить просьбу собеседника больше не звонить и исключить его номер из следующих звонков. Вызывать сразу при такой просьбе; не подтверждать исключение до saved=true.",
+    "expects_response": true,
+    "response_timeout_secs": 30,
+    "parameters": {"type": "object", "properties": {}, "required": [], "additionalProperties": false}
+  },
+  {
+    "type": "client",
+    "name": "save_outcome",
+    "description": "Сохранить подтверждённый результат разговора. callback — только просьба о повторном контакте, без автоматического перезвона или обещания времени.",
+    "expects_response": true,
+    "response_timeout_secs": 30,
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "outcome": {
+          "type": "string",
+          "enum": ["interested", "not_interested", "callback", "wrong_number", "unknown"],
+          "description": "Итог, явно подтверждённый словами клиента; если данных недостаточно — unknown."
+        }
+      },
+      "required": ["outcome"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "client",
+    "name": "end_call",
+    "description": "Завершить текущий телефонный разговор после прощания. Перед этим сохранить результат; при запрете звонков сначала успешно выполнить opt_out.",
+    "expects_response": true,
+    "response_timeout_secs": 30,
+    "parameters": {"type": "object", "properties": {}, "required": [], "additionalProperties": false}
+  }
+]
